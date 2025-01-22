@@ -44,35 +44,42 @@
             cursor: pointer;
             display: none;
         }
+        
         .resizer {
-            width: 10px;
-            height: 10px;
+            width: 20px; /* Increased size */
+            height: 20px; /* Increased size */
             background: white;
-            border: 1px solid black;
+            border: 2px solid black; /* Slightly thicker border */
             position: absolute;
             z-index: 1;
-            display: none;
+            border-radius: 50%; /* Makes the notches round */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional: Adds a subtle shadow for visibility */
         }
+        
         .resizer.topleft {
-            top: -5px;
-            left: -5px;
+            top: -10px;
+            left: -10px;
             cursor: nwse-resize;
         }
+        
         .resizer.topright {
-            top: -5px;
-            right: -5px;
+            top: -10px;
+            right: -10px;
             cursor: nesw-resize;
         }
+        
         .resizer.bottomleft {
-            bottom: -5px;
-            left: -5px;
+            bottom: -10px;
+            left: -10px;
             cursor: nesw-resize;
         }
+        
         .resizer.bottomright {
-            bottom: -5px;
-            right: -5px;
+            bottom: -10px;
+            right: -10px;
             cursor: nwse-resize;
         }
+        
     </style>
 </head>
 <body class="beard">
