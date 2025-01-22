@@ -110,10 +110,6 @@
     
 
     <script>
-        // Disable scroll globally by default
-        document.body.style.overflow = "hidden";
-        document.body.style.touchAction = "none"; // Prevent scrolling on touch devices
-    
         const container = document.querySelector(".image-container");
         const div = document.querySelector(".movable");
         const fileInput = document.getElementById("fileInput");
@@ -122,6 +118,17 @@
     
         let offsetX, offsetY, isDragging = false;
         let isResizing = false, currentResizer;
+
+        function disableScroll() {
+            document.body.style.overflow = "hidden";
+            document.body.style.touchAction = "none"; // Prevent scrolling on touch devices
+        }
+        
+        function enableScroll() {
+            document.body.style.overflow = "";
+            document.body.style.touchAction = ""; // Re-enable scrolling on touch devices
+        }
+        
     
         function constrainMovement() {
             const rect = div.getBoundingClientRect();
@@ -178,41 +185,42 @@
     
         function resize(e) {
             if (!isResizing) return;
-    
+        
             const touch = e.touches ? e.touches[0] : e;
             const rect = div.getBoundingClientRect();
-            const minWidth = 30; // Minimum width for the div
+        
+            const minWidth = 30;  // Minimum width for the div
             const minHeight = 30; // Minimum height for the div
-            const step = 2; // Gradual resizing increment
-    
+        
             if (currentResizer.classList.contains("bottomright")) {
-                const newWidth = Math.max(rect.width + (touch.clientX - rect.right) / step, minWidth);
-                const newHeight = Math.max(rect.height + (touch.clientY - rect.bottom) / step, minHeight);
+                const newWidth = Math.max(touch.clientX - rect.left, minWidth);
+                const newHeight = Math.max(touch.clientY - rect.top, minHeight);
                 div.style.width = `${newWidth}px`;
                 div.style.height = `${newHeight}px`;
             } else if (currentResizer.classList.contains("bottomleft")) {
-                const newWidth = Math.max(rect.width - (touch.clientX - rect.left) / step, minWidth);
-                const newHeight = Math.max(rect.height + (touch.clientY - rect.bottom) / step, minHeight);
+                const newWidth = Math.max(rect.right - touch.clientX, minWidth);
+                const newHeight = Math.max(touch.clientY - rect.top, minHeight);
                 div.style.width = `${newWidth}px`;
                 div.style.height = `${newHeight}px`;
                 div.style.left = `${rect.right - newWidth}px`;
             } else if (currentResizer.classList.contains("topright")) {
-                const newWidth = Math.max(rect.width + (touch.clientX - rect.right) / step, minWidth);
-                const newHeight = Math.max(rect.height - (touch.clientY - rect.top) / step, minHeight);
+                const newWidth = Math.max(touch.clientX - rect.left, minWidth);
+                const newHeight = Math.max(rect.bottom - touch.clientY, minHeight);
                 div.style.width = `${newWidth}px`;
                 div.style.height = `${newHeight}px`;
                 div.style.top = `${rect.bottom - newHeight}px`;
             } else if (currentResizer.classList.contains("topleft")) {
-                const newWidth = Math.max(rect.width - (touch.clientX - rect.left) / step, minWidth);
-                const newHeight = Math.max(rect.height - (touch.clientY - rect.top) / step, minHeight);
+                const newWidth = Math.max(rect.right - touch.clientX, minWidth);
+                const newHeight = Math.max(rect.bottom - touch.clientY, minHeight);
                 div.style.width = `${newWidth}px`;
                 div.style.height = `${newHeight}px`;
                 div.style.left = `${rect.right - newWidth}px`;
                 div.style.top = `${rect.bottom - newHeight}px`;
             }
-    
+        
             constrainMovement();
         }
+        
     
         function stopResize() {
             isResizing = false;
@@ -263,9 +271,67 @@
             resizer.addEventListener("mousedown", startResize);
             resizer.addEventListener("touchstart", startResize, { passive: false });
         });
+    
+        document.querySelector(".add-btn").addEventListener("click", () => {
+            fileInput.click();
+        });
+    
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const newImage = document.createElement("img");
+                    newImage.src = event.target.result;
+                    newImage.alt = "New Image";
+                    newImage.classList.add("static-image");
+    
+                    // Add the new image below the existing one
+                    container.appendChild(newImage);
+    
+                    // Hide the Add Image button
+                    addBtn.style.display = "none";
+    
+                    // Change the Add button text to "Save Image" and show the save button
+                    addBtn.textContent = "Save Image";
+                    saveBtn.style.display = "inline-block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    
+        saveBtn.addEventListener("click", function() {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+    
+            const beardImage = div.querySelector("img");
+            const uploadedImage = container.querySelector(".static-image");
+    
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+    
+            const containerRect = container.getBoundingClientRect();
+            const beardRect = div.getBoundingClientRect();
+            const uploadedRect = uploadedImage.getBoundingClientRect();
+    
+            const beardX = beardRect.left - containerRect.left;
+            const beardY = beardRect.top - containerRect.top;
+    
+            const uploadedX = uploadedRect.left - containerRect.left;
+            const uploadedY = uploadedRect.top - containerRect.top;
+            const uploadedWidth = uploadedRect.width;
+            const uploadedHeight = uploadedRect.height;
+    
+            ctx.drawImage(uploadedImage, uploadedX, uploadedY, uploadedWidth, uploadedHeight);
+            ctx.drawImage(beardImage, beardX, beardY, beardRect.width, beardRect.height);
+    
+            const dataUrl = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = "combined-image.png";
+            link.click();
+        });
     </script>
-    
-    
     </body>
 </html>
 
