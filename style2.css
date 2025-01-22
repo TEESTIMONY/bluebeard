@@ -1,0 +1,107 @@
+/* bead pageeeee */
+body{
+    background-color: #62bcec;
+}
+.main-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .image-container{
+    width: 400px;
+    height: 400px;
+    background-color: #62bcec;
+    border: 2px solid black;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+
+  .add-img button{
+    display: inline-block;
+    width: 250px;
+    height: 55px;
+    text-decoration: none;
+    background-color:#fff4b4 ;
+    padding: 10px;
+    border-radius: 15px;
+    text-align: center;
+    color: black;
+    font-size: 20px;
+    font-family: "Shojumaru", serif;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 1);
+    border: 2px solid black;
+    cursor: pointer;
+    
+  }
+  
+  .put-on-text{
+    font-family: "Shojumaru", serif;
+    color:white;
+    -webkit-text-stroke:1px black;
+
+
+
+  }
+
+
+  .movable {
+    position: absolute;
+    width: 200px;
+    height: 150px;
+    background-color: transparent;
+    cursor: grab;
+    top: 100px;
+    left: 100px;
+    border: 1px solid #babaf5;
+    box-sizing: border-box;
+    overflow: hidden; /* Ensures the image doesn't overflow the container */
+}
+
+.movable img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image scales correctly */
+}
+
+/* Resizer handles */
+
+
+.the-body-container{
+  left: -500px;
+}
+
+.back-btn {
+  margin-left: 500px;
+  margin-top: 150px;
+  display: inline-block;
+  width: 150px;
+  height: 40px;
+  padding-top: 20px;
+  text-decoration: none;
+  background-color:#fff4b4 ;
+  border-radius: 15px;
+  text-align: center;
+  color: black;
+  font-size: 20px;
+  font-family: "Shojumaru", serif;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 1);
+  border: 2px solid black;
+  cursor: pointer;
+}
+
+
+/* Mobile View (max-width: 768px) */
+@media (max-width: 768px) {
+  .back-btn{
+    margin: 10px;
+    width: 100px;
+    height: 30px;
+    font-size: 18px;
+    padding-top: 7px;
+  }
+
+ 
+}

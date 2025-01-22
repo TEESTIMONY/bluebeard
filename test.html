@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable & Resizable Image</title>
+    <style>
+        .movable {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            background-color: transparent;
+            cursor: grab;
+            top: 100px;
+            left: 100px;
+            border: 1px solid #babaf5;
+            box-sizing: border-box;
+            overflow: hidden; /* Ensures the image doesn't overflow the container */
+        }
+
+        .movable img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image scales correctly */
+        }
+
+        /* Resizer handles */
+        .resizer {
+            position: absolute;
+            border-radius: 50%;
+            background: blue;
+        }
+
+        /* Corners */
+        .resizer.topleft, .resizer.topright, .resizer.bottomleft, .resizer.bottomright {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Sides */
+        .resizer.top, .resizer.bottom {
+            height: 10px;
+            width: 100%;
+            cursor: ns-resize;
+        }
+
+        .resizer.left, .resizer.right {
+            width: 10px;
+            height: 100%;
+            cursor: ew-resize;
+        }
+
+        /* Positioning resizers */
+        .top { top: -5px; left: 0; cursor: ns-resize; }
+        .bottom { bottom: -5px; left: 0; cursor: ns-resize; }
+        .left { left: -5px; top: 0; cursor: ew-resize; }
+        .right { right: -5px; top: 0; cursor: ew-resize; }
+
+        .topleft { top: -5px; left: -5px; cursor: nwse-resize; }
+        .topright { top: -5px; right: -5px; cursor: nesw-resize; }
+        .bottomleft { bottom: -5px; left: -5px; cursor: nesw-resize; }
+        .bottomright { bottom: -5px; right: -5px; cursor: nwse-resize; }
+    </style>
+</head>
+<body>
+    <div class="movable">
+        <img src="img7.png" alt="Draggable Image">
+        <div class="resizer topleft"></div>
+        <div class="resizer topright"></div>
+        <div class="resizer bottomleft"></div>
+        <div class="resizer bottomright"></div>
+    </div>
+
+    <script>
+        const div = document.querySelector(".movable");
+        let offsetX, offsetY, isDragging = false;
+
+        // Function to show the border when clicked
+        div.addEventListener("mousedown", (e) => {
+            if (!e.target.classList.contains("resizer")) {
+                div.style.border = "2px solid #babaf5;";
+            }
+        });
+
+        // Function to hide the border when clicking outside
+        document.addEventListener("mousedown", (e) => {
+            if (!div.contains(e.target)) {
+                div.style.border = "none";
+            }
+        });
+
+        // Function to show the resizers
+        function showResizers() {
+            const resizers = document.querySelectorAll(".resizer");
+            resizers.forEach(resizer => {
+                resizer.style.display = "block";
+            });
+        }
+
+        // Function to hide the resizers
+        function hideResizers() {
+            const resizers = document.querySelectorAll(".resizer");
+            resizers.forEach(resizer => {
+                resizer.style.display = "none";
+            });
+        }
+
+        // Show border and resizers when clicking inside
+        div.addEventListener("mousedown", (e) => {
+            if (!e.target.classList.contains("resizer")) {
+                div.style.border = "2px solid #babaf5;";
+                showResizers();
+            }
+        });
+
+        // Hide border and resizers when clicking outside
+        document.addEventListener("mousedown", (e) => {
+            if (!div.contains(e.target)) {
+                div.style.border = "none";
+                hideResizers();
+            }
+        });
+
+        
+
+        // Dragging functionality
+        div.addEventListener("mousedown", (e) => {
+            if (e.target.classList.contains("resizer")) return; // Skip dragging if resizing
+            isDragging = true;
+            offsetX = e.clientX - div.offsetLeft;
+            offsetY = e.clientY - div.offsetTop;
+            div.style.cursor = "grabbing";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                div.style.left = `${e.clientX - offsetX}px`;
+                div.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+            isDragging = false;
+            div.style.cursor = "grab";
+        });
+
+        // Resizing functionality
+        const resizers = document.querySelectorAll(".resizer");
+        let isResizing = false, currentResizer;
+
+        resizers.forEach(resizer => {
+            resizer.addEventListener("mousedown", (e) => {
+                isResizing = true;
+                currentResizer = e.target;
+                document.addEventListener("mousemove", resize);
+                document.addEventListener("mouseup", stopResize);
+                e.stopPropagation(); // Prevent drag while resizing
+            });
+        });
+
+        function resize(e) {
+            if (!isResizing) return;
+
+            const rect = div.getBoundingClientRect();
+
+            if (currentResizer.classList.contains("bottomright")) {
+                div.style.width = `${e.clientX - rect.left}px`;
+                div.style.height = `${e.clientY - rect.top}px`;
+            } else if (currentResizer.classList.contains("bottomleft")) {
+                div.style.width = `${rect.right - e.clientX}px`;
+                div.style.left = `${e.clientX}px`;
+                div.style.height = `${e.clientY - rect.top}px`;
+            } else if (currentResizer.classList.contains("topright")) {
+                div.style.width = `${e.clientX - rect.left}px`;
+                div.style.height = `${rect.bottom - e.clientY}px`;
+                div.style.top = `${e.clientY}px`;
+            } else if (currentResizer.classList.contains("topleft")) {
+                div.style.width = `${rect.right - e.clientX}px`;
+                div.style.left = `${e.clientX}px`;
+                div.style.height = `${rect.bottom - e.clientY}px`;
+                div.style.top = `${e.clientY}px`;
+            } else if (currentResizer.classList.contains("top")) {
+                div.style.height = `${rect.bottom - e.clientY}px`;
+                div.style.top = `${e.clientY}px`;
+            } else if (currentResizer.classList.contains("bottom")) {
+                div.style.height = `${e.clientY - rect.top}px`;
+            } else if (currentResizer.classList.contains("left")) {
+                div.style.width = `${rect.right - e.clientX}px`;
+                div.style.left = `${e.clientX}px`;
+            } else if (currentResizer.classList.contains("right")) {
+                div.style.width = `${e.clientX - rect.left}px`;
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener("mousemove", resize);
+            document.removeEventListener("mouseup", stopResize);
+        }
+    </script>
+</body>
+</html>

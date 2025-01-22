@@ -1,0 +1,47 @@
+.movable {
+    position: absolute;
+    width: 200px;
+    height: 150px;
+    background-color: lightblue;
+    cursor: grab;
+    top: 100px;
+    left: 100px;
+    border: 2px solid black;
+    box-sizing: border-box;
+}
+
+/* Resizer handles */
+.resizer {
+    position: absolute;
+    background: red;
+}
+
+/* Corners */
+.resizer.topleft, .resizer.topright, .resizer.bottomleft, .resizer.bottomright {
+    width: 15px;
+    height: 15px;
+}
+
+/* Sides */
+.resizer.top, .resizer.bottom {
+    height: 10px;
+    width: 100%;
+    cursor: ns-resize;
+}
+
+.resizer.left, .resizer.right {
+    width: 10px;
+    height: 100%;
+    cursor: ew-resize;
+}
+
+/* Positioning resizers */
+.top { top: -5px; left: 0; cursor: ns-resize; }
+.bottom { bottom: -5px; left: 0; cursor: ns-resize; }
+.left { left: -5px; top: 0; cursor: ew-resize; }
+.right { right: -5px; top: 0; cursor: ew-resize; }
+
+.topleft { top: -5px; left: -5px; cursor: nwse-resize; }
+.topright { top: -5px; right: -5px; cursor: nesw-resize; }
+.bottomleft { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.bottomright { bottom: -5px; right: -5px; cursor: nwse-resize; }
