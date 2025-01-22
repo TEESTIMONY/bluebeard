@@ -167,28 +167,42 @@
     
         function resize(e) {
             if (!isResizing) return;
+        
             const touch = e.touches ? e.touches[0] : e;
             const rect = div.getBoundingClientRect();
-    
+        
+            const minWidth = 30;  // Minimum width for the div
+            const minHeight = 30; // Minimum height for the div
+        
             if (currentResizer.classList.contains("bottomright")) {
-                div.style.width = `${touch.clientX - rect.left}px`;
-                div.style.height = `${touch.clientY - rect.top}px`;
+                const newWidth = Math.max(touch.clientX - rect.left, minWidth);
+                const newHeight = Math.max(touch.clientY - rect.top, minHeight);
+                div.style.width = `${newWidth}px`;
+                div.style.height = `${newHeight}px`;
             } else if (currentResizer.classList.contains("bottomleft")) {
-                div.style.width = `${rect.right - touch.clientX}px`;
-                div.style.left = `${touch.clientX}px`;
-                div.style.height = `${touch.clientY - rect.top}px`;
+                const newWidth = Math.max(rect.right - touch.clientX, minWidth);
+                const newHeight = Math.max(touch.clientY - rect.top, minHeight);
+                div.style.width = `${newWidth}px`;
+                div.style.height = `${newHeight}px`;
+                div.style.left = `${rect.right - newWidth}px`;
             } else if (currentResizer.classList.contains("topright")) {
-                div.style.width = `${touch.clientX - rect.left}px`;
-                div.style.height = `${rect.bottom - touch.clientY}px`;
-                div.style.top = `${touch.clientY}px`;
+                const newWidth = Math.max(touch.clientX - rect.left, minWidth);
+                const newHeight = Math.max(rect.bottom - touch.clientY, minHeight);
+                div.style.width = `${newWidth}px`;
+                div.style.height = `${newHeight}px`;
+                div.style.top = `${rect.bottom - newHeight}px`;
             } else if (currentResizer.classList.contains("topleft")) {
-                div.style.width = `${rect.right - touch.clientX}px`;
-                div.style.left = `${touch.clientX}px`;
-                div.style.height = `${rect.bottom - touch.clientY}px`;
-                div.style.top = `${touch.clientY}px`;
+                const newWidth = Math.max(rect.right - touch.clientX, minWidth);
+                const newHeight = Math.max(rect.bottom - touch.clientY, minHeight);
+                div.style.width = `${newWidth}px`;
+                div.style.height = `${newHeight}px`;
+                div.style.left = `${rect.right - newWidth}px`;
+                div.style.top = `${rect.bottom - newHeight}px`;
             }
+        
             constrainMovement();
         }
+        
     
         function stopResize() {
             isResizing = false;
