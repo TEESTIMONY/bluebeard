@@ -110,6 +110,9 @@
     
 
     <script>
+        // Disable scroll globally by default
+        document.body.style.overflow = "hidden";
+        document.body.style.touchAction = "none"; 
         const container = document.querySelector(".image-container");
         const div = document.querySelector(".movable");
         const fileInput = document.getElementById("fileInput");
