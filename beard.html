@@ -108,117 +108,142 @@
         const fileInput = document.getElementById("fileInput");
         const addBtn = document.querySelector(".add-btn");
         const saveBtn = document.getElementById("saveImageBtn");
-
+    
         let offsetX, offsetY, isDragging = false;
         let isResizing = false, currentResizer;
-
+    
         function constrainMovement() {
             const rect = div.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
-
+    
             if (rect.left < containerRect.left) {
                 div.style.left = "0px";
             } else if (rect.right > containerRect.right) {
                 div.style.left = `${containerRect.width - rect.width}px`;
             }
-
+    
             if (rect.top < containerRect.top) {
                 div.style.top = "0px";
             } else if (rect.bottom > containerRect.bottom) {
                 div.style.top = `${containerRect.height - rect.height}px`;
             }
         }
-
-        div.addEventListener("mousedown", (e) => {
-            if (!e.target.classList.contains("resizer")) {
+    
+        function startDrag(e) {
+            const touch = e.touches ? e.touches[0] : e;
+            if (!touch.target.classList.contains("resizer")) {
                 isDragging = true;
-                offsetX = e.clientX - div.offsetLeft;
-                offsetY = e.clientY - div.offsetTop;
+                offsetX = touch.clientX - div.offsetLeft;
+                offsetY = touch.clientY - div.offsetTop;
                 div.style.cursor = "grabbing";
                 div.style.border = "2px solid #babaf5";
                 showResizers();
             }
-        });
-
-        document.addEventListener("mousemove", (e) => {
-            if (isDragging) {
-                div.style.left = `${e.clientX - offsetX}px`;
-                div.style.top = `${e.clientY - offsetY}px`;
-                constrainMovement();
-            }
-        });
-
-        document.addEventListener("mouseup", () => {
+        }
+    
+        function drag(e) {
+            if (!isDragging) return;
+            const touch = e.touches ? e.touches[0] : e;
+            div.style.left = `${touch.clientX - offsetX}px`;
+            div.style.top = `${touch.clientY - offsetY}px`;
+            constrainMovement();
+        }
+    
+        function endDrag() {
             isDragging = false;
             div.style.cursor = "grab";
-        });
-
+        }
+    
+        function startResize(e) {
+            const touch = e.touches ? e.touches[0] : e;
+            isResizing = true;
+            currentResizer = touch.target;
+            document.addEventListener("mousemove", resize);
+            document.addEventListener("mouseup", stopResize);
+            document.addEventListener("touchmove", resize, { passive: false });
+            document.addEventListener("touchend", stopResize);
+            e.stopPropagation();
+        }
+    
+        function resize(e) {
+            if (!isResizing) return;
+            const touch = e.touches ? e.touches[0] : e;
+            const rect = div.getBoundingClientRect();
+    
+            if (currentResizer.classList.contains("bottomright")) {
+                div.style.width = `${touch.clientX - rect.left}px`;
+                div.style.height = `${touch.clientY - rect.top}px`;
+            } else if (currentResizer.classList.contains("bottomleft")) {
+                div.style.width = `${rect.right - touch.clientX}px`;
+                div.style.left = `${touch.clientX}px`;
+                div.style.height = `${touch.clientY - rect.top}px`;
+            } else if (currentResizer.classList.contains("topright")) {
+                div.style.width = `${touch.clientX - rect.left}px`;
+                div.style.height = `${rect.bottom - touch.clientY}px`;
+                div.style.top = `${touch.clientY}px`;
+            } else if (currentResizer.classList.contains("topleft")) {
+                div.style.width = `${rect.right - touch.clientX}px`;
+                div.style.left = `${touch.clientX}px`;
+                div.style.height = `${rect.bottom - touch.clientY}px`;
+                div.style.top = `${touch.clientY}px`;
+            }
+            constrainMovement();
+        }
+    
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener("mousemove", resize);
+            document.removeEventListener("mouseup", stopResize);
+            document.removeEventListener("touchmove", resize);
+            document.removeEventListener("touchend", stopResize);
+        }
+    
+        function showResizers() {
+            resizers.forEach(resizer => {
+                resizer.style.display = "block";
+            });
+        }
+    
+        function hideResizers() {
+            resizers.forEach(resizer => {
+                resizer.style.display = "none";
+            });
+        }
+    
+        div.addEventListener("mousedown", startDrag);
+        div.addEventListener("touchstart", startDrag, { passive: false });
+    
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("touchmove", drag, { passive: false });
+    
+        document.addEventListener("mouseup", endDrag);
+        document.addEventListener("touchend", endDrag);
+    
         document.addEventListener("mousedown", (e) => {
             if (!div.contains(e.target) && !e.target.classList.contains("resizer")) {
                 div.style.border = "none";
                 hideResizers();
             }
         });
-
-        const resizers = document.querySelectorAll(".resizer");
-
-        resizers.forEach(resizer => {
-            resizer.addEventListener("mousedown", (e) => {
-                isResizing = true;
-                currentResizer = e.target;
-                document.addEventListener("mousemove", resize);
-                document.addEventListener("mouseup", stopResize);
-                e.stopPropagation();
-            });
-        });
-
-        function resize(e) {
-            if (!isResizing) return;
-
-            const rect = div.getBoundingClientRect();
-
-            if (currentResizer.classList.contains("bottomright")) {
-                div.style.width = `${e.clientX - rect.left}px`;
-                div.style.height = `${e.clientY - rect.top}px`;
-            } else if (currentResizer.classList.contains("bottomleft")) {
-                div.style.width = `${rect.right - e.clientX}px`;
-                div.style.left = `${e.clientX}px`;
-                div.style.height = `${e.clientY - rect.top}px`;
-            } else if (currentResizer.classList.contains("topright")) {
-                div.style.width = `${e.clientX - rect.left}px`;
-                div.style.height = `${rect.bottom - e.clientY}px`;
-                div.style.top = `${e.clientY}px`;
-            } else if (currentResizer.classList.contains("topleft")) {
-                div.style.width = `${rect.right - e.clientX}px`;
-                div.style.left = `${e.clientX}px`;
-                div.style.height = `${rect.bottom - e.clientY}px`;
-                div.style.top = `${e.clientY}px`;
+    
+        document.addEventListener("touchstart", (e) => {
+            if (!div.contains(e.target) && !e.target.classList.contains("resizer")) {
+                div.style.border = "none";
+                hideResizers();
             }
-            constrainMovement();
-        }
-
-        function stopResize() {
-            isResizing = false;
-            document.removeEventListener("mousemove", resize);
-            document.removeEventListener("mouseup", stopResize);
-        }
-
-        function showResizers() {
-            resizers.forEach(resizer => {
-                resizer.style.display = "block";
-            });
-        }
-
-        function hideResizers() {
-            resizers.forEach(resizer => {
-                resizer.style.display = "none";
-            });
-        }
-
+        });
+    
+        const resizers = document.querySelectorAll(".resizer");
+    
+        resizers.forEach(resizer => {
+            resizer.addEventListener("mousedown", startResize);
+            resizer.addEventListener("touchstart", startResize, { passive: false });
+        });
+    
         document.querySelector(".add-btn").addEventListener("click", () => {
             fileInput.click();
         });
-
+    
         fileInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -228,13 +253,13 @@
                     newImage.src = event.target.result;
                     newImage.alt = "New Image";
                     newImage.classList.add("static-image");
-
+    
                     // Add the new image below the existing one
                     container.appendChild(newImage);
-
+    
                     // Hide the Add Image button
-                    addBtn.style.display = "none";  // Hides the "Add Image" button
-
+                    addBtn.style.display = "none";
+    
                     // Change the Add button text to "Save Image" and show the save button
                     addBtn.textContent = "Save Image";
                     saveBtn.style.display = "inline-block";
@@ -242,46 +267,32 @@
                 reader.readAsDataURL(file);
             }
         });
-
+    
         saveBtn.addEventListener("click", function() {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-
-            const beardImage = div.querySelector("img"); // Beard image
-            const uploadedImage = container.querySelector(".static-image"); // Uploaded image
-
-            // Set canvas size to match the container size
+    
+            const beardImage = div.querySelector("img");
+            const uploadedImage = container.querySelector(".static-image");
+    
             canvas.width = container.offsetWidth;
             canvas.height = container.offsetHeight;
-
-            // Get container and beard positioning
+    
             const containerRect = container.getBoundingClientRect();
             const beardRect = div.getBoundingClientRect();
             const uploadedRect = uploadedImage.getBoundingClientRect();
-
-            // Calculate the position of the beard relative to the container
+    
             const beardX = beardRect.left - containerRect.left;
             const beardY = beardRect.top - containerRect.top;
-
-            // Calculate the position and size of the uploaded image relative to the container
+    
             const uploadedX = uploadedRect.left - containerRect.left;
             const uploadedY = uploadedRect.top - containerRect.top;
             const uploadedWidth = uploadedRect.width;
             const uploadedHeight = uploadedRect.height;
-
-            // Draw the uploaded image
+    
             ctx.drawImage(uploadedImage, uploadedX, uploadedY, uploadedWidth, uploadedHeight);
-
-            // Draw the beard image
-            ctx.drawImage(
-                beardImage,
-                beardX,
-                beardY,
-                beardRect.width,
-                beardRect.height
-            );
-
-            // Create downloadable link for the combined image
+            ctx.drawImage(beardImage, beardX, beardY, beardRect.width, beardRect.height);
+    
             const dataUrl = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.href = dataUrl;
@@ -289,6 +300,6 @@
             link.click();
         });
     </script>
-</body>
+    </body>
 </html>
 
